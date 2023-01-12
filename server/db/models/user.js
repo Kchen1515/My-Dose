@@ -17,11 +17,11 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true
+  },
+  initial: {
+    type: Array,
+    required: true
   }
-  // sugarReading: {
-  //   type: Array,
-  //   requiredf
-  // }
 })
 
 const User = mongoose.model("User", userSchema);

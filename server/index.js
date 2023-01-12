@@ -29,23 +29,12 @@ app.use(cors());
 app.use(morgan("dev"))
 
 // Routes //
-app.get('/users', routes)
+app.get('/user', routes)
+app.post('/details', routes)
 app.post('/signup', routes)
 app.post('/signin', routes)
-// app.get("/users", (req, res) => {
-//   return User.find({})
-//     .then((data) => {
-//       res.json(data)
-//     })
-//     .catch((err) => {
-//       res.json(err)
-//     })
-// })
-// app.post('/signup', (req, res) => {
-//   const {firstName, lastName, email, password} = req.body
-//   res.json(req.body)
 
-// })
+
 
 
 // Listening on port //

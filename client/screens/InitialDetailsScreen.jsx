@@ -1,14 +1,21 @@
 import { View, Text, StyleSheet, ViewStyle, TextStyle, TextInputProps,Pressable, TouchableOpacity,
   KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard} from 'react-native'
-import React, {useLayoutEffect} from 'react'
+import React, {useLayoutEffect, useEffect, useState, useContext} from 'react'
 import { useForm, Controller } from "react-hook-form";
 import {TextInput, Button, IconButton} from 'react-native-paper'
 import {NavigationContainer,useNavigation } from '@react-navigation/native';
+import axios from 'axios'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StateContext, Context } from '../context/auth.js'
 
 
 
 
 const InitialDetailsScreen = ({navigation}) => {
+  const [userId, setUserId] = useState('')
+  const {state, setState} = useContext(Context)
+
+
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions({
@@ -23,7 +30,22 @@ const InitialDetailsScreen = ({navigation}) => {
     }
   });
 
-  const onSubmit = () => {
+  useEffect(() => {
+    getFromLocal();
+  },[])
+  const getFromLocal = async () => {
+    let data = await AsyncStorage.getItem("auth-key")
+    let user = JSON.parse(data).user
+    console.log("Where is it coming from" + user)
+    setUserId(user._id)
+  }
+
+  const onSubmit = async (data) => {
+    console.log(data)
+    console.log(userId)
+    let user = await axios.post(`http://localhost:3000/details?id=${userId}`, data)
+    setState(user.data)
+    await AsyncStorage.setItem('auth-key', JSON.stringify(user.data))
     navigation.navigate("Insulin Calculator")
   }
 
@@ -33,6 +55,7 @@ const InitialDetailsScreen = ({navigation}) => {
 
       <KeyboardAvoidingView  behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <View className="flex items-center justify-center h-full bg-white">
+          <IconButton icon="arrow-left" className="absolute left-0 top-[50px]" onPress={() => navigation.navigate("Sign Up")}/>
           <View>
             <Text className="text-3xl mb-10 font-extrabold text-blue-600">Lets Gather Some Data</Text>
           </View>
@@ -104,7 +127,7 @@ const InitialDetailsScreen = ({navigation}) => {
               )}
               name="target"
             />
-            <Button className="bg-blue-600 mt-8 border p-[3px] w-[350px] rounded" onPress={() => navigation.navigate("Insulin Calculator")}>
+            <Button className="bg-blue-600 mt-8 border p-[3px] w-[350px] rounded" onPress={handleSubmit(onSubmit)}>
               <Text className="text-white font-bold">SAVE DATA</Text>
             </Button>
         </View>

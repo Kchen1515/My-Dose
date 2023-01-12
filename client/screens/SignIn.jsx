@@ -1,15 +1,17 @@
 import { View,Text, StyleSheet, ViewStyle, TextStyle, TextInputProps,KeyboardAvoidingView} from 'react-native'
 import { useForm, Controller } from "react-hook-form";
 import SignupBtn from '../components/SignupBtn.jsx'
-import React, {useLayoutEffect} from 'react'
+import React, {useLayoutEffect, useContext} from 'react'
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {TextInput, Button, IconButton} from 'react-native-paper'
 import {NavigationContainer,useNavigation } from '@react-navigation/native';
+import { StateContext, Context } from '../context/auth.js'
 
 
 
 const SignIn = ({navigation}) => {
+  const {state, setState} = useContext(Context)
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions({
@@ -28,11 +30,12 @@ const SignIn = ({navigation}) => {
    const user = await axios.post('http://localhost:3000/signin', data);
    if(user.data.error){
     alert(user.data.error)
-   }else{
-    await AsyncStorage.setItem('auth-rn', JSON.stringify(data))
-    navigation.navigate("Insulin Calculator")
-    alert("Sign In Successful")
-    console.log(user.data)
+   } else {
+    setState(user.data)
+    console.log("This is state" + state)
+    await AsyncStorage.setItem('auth-key', JSON.stringify(user.data))
+    alert('Signed in Successfully')
+    navigation.navigate('Insulin Calculator')
    }
   }
 
@@ -91,7 +94,7 @@ const SignIn = ({navigation}) => {
             )}
             name="password"
           />
-          <Button className="border-blue-600 bg-blue-600 p-[3px] mt-7 w-[350px] rounded hover:bg-white " onPress={() => navigation.navigate("Insulin Calculator")}>
+          <Button className="border-blue-600 bg-blue-600 p-[3px] mt-7 w-[350px] rounded hover:bg-white " onPress={handleSubmit(onSubmit)}>
             <Text className="text-white font-bold">LOGIN</Text>
           </Button>
           <View className="mt-6">

@@ -1,4 +1,5 @@
 // const { hashPassword, comparePassword } = require("../helpers/auth");
+require("dotenv").config({path: '../.env'});
 const jwt = require ("jsonwebtoken");
 // const {nanoid} = require("nanoid");
 const User = require("../db/models/user.js")
@@ -6,9 +7,9 @@ const User = require("../db/models/user.js")
 // exports.signup = async (req, res) => {
 //   const {firstName, lastName, email, password,sugarReading} = req.body
 
-//   const userExists = await User.findOne({email})
+//   const user = await User.findOne({email})
 
-//   if(userExists) {
+//   if(user) {
 //     return res.json({
 //       error: "Email is taken"
 //     })
@@ -27,50 +28,99 @@ const User = require("../db/models/user.js")
 // }
 
 exports.signUp = async  (req,res) => {
+  //Deconstruct the request //
   const {firstName, lastName, email, password} = req.body;
-  const userExists = await User.findOne({email}).exec();
-
-  if(userExists){
+  // Validation //
+  if(!firstName || !lastName || !email || !password){
+    return res.json({
+      error: "All fields are required "
+    })
+  }
+  // Search for existing user //
+  const user = await User.findOne({email}).exec();
+  // Handle user already exists //
+  if(user){
     return res.json({
       error: "Email is taken"
     })
   }
-  return User.create({
+  // Create a new user if user not found //
+  const newUser = await User.create({
     firstName:firstName,
     lastName: lastName,
     email: email,
     password: password
-  }).then((newUser) => {
-    res.send(newUser.data)
+  })
+  //Create JWT //
+  const token = jwt.sign({_id: newUser._id}, process.env.JWT, {expiresIn: "7d"});
+
+  console.log({
+    token,
+    user: newUser
+  })
+  return res.json({
+    token,
+    user: newUser
   })
 }
 
 exports.signIn = async (req, res) => {
   const {email, password} = req.body;
-  const userExists = await User.findOne({email});
+  const user = await User.findOne({email});
 
-  if(!userExists){
+  if(!user){
     return res.json({
       error: "No User Found"
     })
   }
-  if(userExists && userExists.password === password){
-    return res.json(userExists)
-  } else {
+  const compare = user.password === password ? true : false
+  console.log(`Value of compare is: ${compare}`)
+  if(!compare){
     return res.json({
-      error: "Wrong password"
+      error: "Wrong Password"
     })
   }
+  const token = jwt.sign({_id: user._id}, process.env.JWT, {expiresIn: "7d"});
+  user.password = undefined;
+  user.secret = undefined;
+  return res.json({
+    token,
+    user
+  })
 }
 
-exports.getUsers = (req, res) => {
-  return User.find({})
+exports.getUser = (req, res) => {
+  console.log('These ar' + JSON.stringify(req.params))
+  // console.log('Value of id' + id )
+  return User.findOne({_id: req.query.id})
     .then((data) => {
-      res.json(data)
+      console.log(data)
+      return res.json(data)
+    }).catch((err) => {
+      console.log(err)
     })
-    .catch((err) => {
-      res.json(err)
-    })
+  res.send('POST request to the homepage')
+}
+
+exports.addDetails = async (req, res) => {
+  const {carbRatio, isf, target} = req.body;
+
+  const user = await User.findOne({ _id: req.query.id})
+
+  if (!user) {
+    console.log('User not found');
+    return;
+  }
+  user.initial.push({
+    carbRatio: carbRatio,
+    isf: isf,
+    target: target
+  })
+  let updatedUser = await user.save();
+  return res.json({
+    token: "",
+    user: updatedUser
+  })
 }
 
 // exports.signin = async (req, res) => {

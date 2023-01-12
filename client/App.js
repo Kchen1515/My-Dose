@@ -9,18 +9,20 @@ import Signup from './screens/Signup.jsx'
 import SignIn from './screens/SignIn.jsx'
 const Stack = createNativeStackNavigator();
 import {Button} from 'react-native-paper'
+import { StateContext } from './context/auth.js'
 
 const App = () => {
-
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Sign Up" component={Signup}/>
-        <Stack.Screen name="Sign In" component={SignIn} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Initial Details" component={InitialDetailsScreen}/>
-        <Stack.Screen name="Insulin Calculator" component={CalculatorScreen} />
-      </Stack.Navigator>
+      <StateContext>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Sign Up" component={Signup}/>
+          <Stack.Screen name="Sign In" component={SignIn} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Initial Details" component={InitialDetailsScreen}/>
+          <Stack.Screen name="Insulin Calculator" component={CalculatorScreen} />
+        </Stack.Navigator>
+      </StateContext>
     </NavigationContainer>
   );
 }

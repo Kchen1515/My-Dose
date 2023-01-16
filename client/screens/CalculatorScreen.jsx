@@ -1,36 +1,39 @@
 import { View, Text, SafeAreaView, ScrollView, Alert, TouchableOpacity,KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native'
-import React, {useLayoutEffect, useState, useEffect} from 'react'
+import React, {useLayoutEffect, useState, useEffect, useContext, useRef} from 'react'
 import {useForm, Controller} from 'react-hook-form'
 import {NavigationContainer,useNavigation } from '@react-navigation/native';
-import Categories from '../components/Categories.jsx'
 import {TextInput, Button, IconButton} from 'react-native-paper'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StateContext, Context } from '../context/auth.js'
 import axios from "axios"
 
-
+// #0b3866
 const CalculatorScreen = ({navigation}) => {
-  const [email, setEmail] = useState('')
+  const [id, setID] = useState('')
+  const [firstName, setFirstName] = useState('')
   const [carbRatio, setCarbRatio] = useState(0)
   const [target, setTarget] = useState(0)
   const [isf, setIsf] = useState(0)
-  const [total, setTotal] = useState()
+  const ref = useRef(0)
+  const [total, setTotal] = useState(0)
+  const {state, setState} = useContext(Context)
+
+
   useEffect(() => {
     getFromLocal();
   },[])
 
   const getFromLocal = async () => {
     let data = await AsyncStorage.getItem("auth-key")
-    console.log("looking at data" + data)
     let user = JSON.parse(data).user
-    console.log('This is the user' + user)
-    console.log('looking at user' + user)
+
     let userId = user._id
+    setID(userId)
     const result = await axios.get(`http://localhost:3000/user?id=${userId}`)
-    setEmail(result.data.email)
+    setFirstName(result.data.firstName)
     setCarbRatio(result.data.initial[0].carbRatio)
     setIsf(result.data.initial[0].isf)
     setTarget(result.data.initial[0].target)
-    console.log(result.data)
   }
 
   const nav = useNavigation();
@@ -47,97 +50,120 @@ const CalculatorScreen = ({navigation}) => {
     }
   });
 
-
-
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const carbCalc = Number(data.carbsEaten) / carbRatio;
     const insulinCalc = (Number(data.current) - target) / isf;
+    const result = Math.ceil(carbCalc + insulinCalc)
+    ref.current = result
+    setTotal((prev) => prev + result)
 
-    setTotal(Math.ceil(carbCalc + insulinCalc))
+    let user = await axios.post(`http://localhost:3000/log?id=${id}`,
+    {
+      date: new Date(),
+      reading: ref.current
+    }
+    )
+    if(user.data){
+      alert("Logged Calculation Successful")
+    } else if (user.data.error){
+      alert(user.data.error)
+    }
+    setState(user.data)
+    await AsyncStorage.setItem('auth-key', JSON.stringify(user.data))
     Keyboard.dismiss()
   }
 
+  const signOut = async () => {
+    setState({
+      token: "",
+      user: {key: "value"}
+    })
+    await AsyncStorage.removeItem('auth-key')
+    navigation.navigate("Home")
+  }
+
+  const initialValues = [
+    {title: "Carbohydrate Ratio",
+     value: carbRatio
+    },
+    {title: "Target Blood Glucose (mg/dL)",
+     value: target
+    },
+    {title: "Insulin Sensitivity Factor",
+     value: isf
+    }
+  ]
+  const calculationInputs = [
+    {title: "Carbohydrates Eaten",
+     text: "grams",
+     defaultFormValue: "carbsEaten"
+    },
+    {title: "Current Blood Sugar",
+     text: "md/dL",
+     defaultFormValue: "current"
+    },
+  ]
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-
       <KeyboardAvoidingView  behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <View className="h-full justify-center items-center flex bg-blue-600">
+        <View className="h-full justify-center items-center flex bg-white">
+          <Button onPress={signOut}> Sign Out</Button>
           <IconButton icon="arrow-left" className="absolute left-0 top-[50px]" onPress={() => navigation.navigate("Initial Details")}/>
-          <Text>{email}</Text>
-          <View>
-            <Text className=" mb-5 text-white font-extrabold text-4xl text-center"> Quickly Calculate Bolus Dose</Text>
+          <IconButton icon="book-open-variant" className="absolute right-0 top-[50px]" onPress={() => navigation.navigate("Log")}/>
+          <View className=" flex items-center h-[80px] justify-between mb-5">
+            <Text className="text-[#0b3866] font-extrabold text-4xl">Welcome <Text className="text-[#357BBD]">{firstName}</Text></Text>
+             <Text className="text-[#0b3866] font-extrabold text-2xl">Calculate Your Bolus Dose</Text>
           </View>
           <View className="flex w-full justify-between items-center mb-10">
-            <View className="flex items-center ">
-              <Text className="text-center mb-2 text-xl font-medium text-white">Carbohydrate Ratio</Text>
-              <View className= "border border-white rounded-full w-[60px] h-[60px] flex items-center justify-center ">
-                <Text className="text-white text-2xl font-extrabold">{carbRatio}</Text>
-              </View>
-            </View>
-            <View className="flex items-center mt-5 ">
-              <Text className="text-center mb-2 text-xl font-medium text-white">Target Blood Glucose</Text>
-              <View className= "border border-white rounded-full w-[60px] h-[60px] flex items-center justify-center ">
-                <Text className="text-white text-2xl font-extrabold">{target}</Text>
-              </View>
-            </View>
-            <View className="flex items-center mt-5 ">
-              <Text className="text-center mb-2 text-xl font-medium text-white">Insulin Sensitivity Factor</Text>
-              <View className= "border border-white rounded-full w-[60px] h-[60px] flex items-center justify-center ">
-                <Text className="text-white text-2xl font-extrabold">{isf}</Text>
-              </View>
-            </View>
+            {
+              initialValues.map((eachValue, i) => {
+                return (
+                  <View className="flex items-center mb-3 " key={i}>
+                    <Text className="text-center mb-2 text-xl font-medium text-[#0b3866]">{eachValue.title}</Text>
+                    <View className= "border-4 border-[#0b3866] rounded-full w-[60px] h-[60px] flex items-center justify-center ">
+                      <Text className="text-[#0b3866] text-2xl font-extrabold">{eachValue.value}</Text>
+                    </View>
+                  </View>
+                )
+              })
+            }
           </View>
           <View className="flex flex-row w-full justify-evenly">
-            <Controller
-                control={control}
-                rules={{required: true}}
-                render={({
-                  field:{onChange, onBlur, value, name}
-                }) => (
-                  <View className="flex justify-center items-center">
-                    <Text className="text-lg text-white">Carbohydrates Eaten</Text>
-                    <TextInput className="rounded w-[125px]"
-                      mode="outlined"
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      keyboardType='number-pad'
-                      right={<TextInput.Affix text="grams"/>}
-
+            {
+              calculationInputs.map((calculation, i) => {
+                return (
+                  <Controller
+                      key={i}
+                      control={control}
+                      rules={{required: true}}
+                      render={({
+                        field:{onChange, onBlur, value, name}
+                      }) => (
+                        <View className="flex justify-center items-center">
+                          <Text className="text-lg text-[#0b3866]">{calculation.title}</Text>
+                          <TextInput className="rounded w-[125px]"
+                            mode="outlined"
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            value={value}
+                            keyboardType='number-pad'
+                            right={<TextInput.Affix text={calculation.text}/>}
+                          />
+                        </View>
+                      )}
+                      name={calculation.defaultFormValue}
                     />
-                  </View>
-                )}
-                name="carbsEaten"
-              />
-            <Controller
-                control={control}
-                rules={{required: true}}
-                render={({
-                  field:{onChange, onBlur, value, name}
-                }) => (
-                  <View className="flex justify-center items-center">
-                    <Text className="text-lg text-white">Current Blood Glucose</Text>
-                    <TextInput className="rounded w-[125px]"
-                      mode="outlined"
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      autoCompleteType="email"
-                      keyboardType='number-pad'
-                      right={<TextInput.Affix text="mg/dL"/>}
-                    />
-                  </View>
-                )}
-                name="current"
-              />
+                )
+              })
+            }
           </View>
-          <Button className="border-2 border-white p-1 bg-transparent w-[150px] rounded flex items-center justify-center mt-10 mb-10" onPress={handleSubmit(onSubmit)}>
-            <Text className="text-white font-extrabold text-xl">Calculate</Text>
+          <Button className="border-2 border-[#0b3866] p-1 bg-transparent w-[150px] rounded flex items-center justify-center mt-10 mb-10" onPress={handleSubmit(onSubmit)}>
+            <Text className="text-[#0b3866] font-extrabold text-xl">Calculate</Text>
           </Button>
           <View className="flex items-center justify-center">
-            <Text className="text-white text-4xl font-extrabold">{total}</Text>
-            <Text className="text-3xl font-bold text-white">Units of Insulin</Text>
+            <Text className="text-[#0b3866] text-4xl font-extrabold">{ref.current}</Text>
+            <Text className="text-3xl font-bold text-[#0b3866]">Units of Insulin</Text>
           </View>
         </View>
       </KeyboardAvoidingView>

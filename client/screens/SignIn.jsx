@@ -1,6 +1,5 @@
 import { View,Text, StyleSheet, ViewStyle, TextStyle, TextInputProps,KeyboardAvoidingView} from 'react-native'
 import { useForm, Controller } from "react-hook-form";
-import SignupBtn from '../components/SignupBtn.jsx'
 import React, {useLayoutEffect, useContext} from 'react'
 import axios from 'axios'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,7 +10,6 @@ import { StateContext, Context } from '../context/auth.js'
 
 
 const SignIn = ({navigation}) => {
-  const {state, setState} = useContext(Context)
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions({
@@ -19,94 +17,102 @@ const SignIn = ({navigation}) => {
     })
   }, [])
 
+  const {state, setState} = useContext(Context)
   const { control, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       email: '',
       password:''
     }
   });
-
+  const formComponents = [
+    {
+      title: "Email:",
+      placeholder: "Enter your email",
+      defaultFormValue: "email",
+      icon: "email",
+      autoCapitalize: "none",
+      secureTextEntry: "false"
+    },
+    {
+      title: "Password:",
+      placeholder: "Enter your password",
+      defaultFormValue: "password",
+      icon: "lock",
+      autoCapitalize: "words",
+      secureTextEntry: "true"
+    },
+  ]
   const onSubmit = async (data) => {
    const user = await axios.post('http://localhost:3000/signin', data);
    if(user.data.error){
     alert(user.data.error)
    } else {
     setState(user.data)
-    console.log("This is state" + state)
     await AsyncStorage.setItem('auth-key', JSON.stringify(user.data))
-    alert('Signed in Successfully')
     navigation.navigate('Insulin Calculator')
+    alert('Signed in Successfully')
    }
   }
 
   return (
     <KeyboardAvoidingView  behavior={Platform.OS === "ios" ? "padding" : "height"}>
-
       <View className="flex items-center justify-center border h-full bg-white">
-        <IconButton icon="arrow-left" className="absolute left-0 top-[50px]" onPress={() => navigation.navigate("Home")}/>
-
+        <IconButton
+          icon="arrow-left"
+          iconColor="#357BBD"
+          className="absolute left-0 top-[50px]"
+          size={35}
+          onPress={() => navigation.navigate("Home")}/>
         <View className="w-full flex items-center justify-center">
-        <Text className="text-3xl mb-6 font-extrabold text-blue-600" > SIGN IN</Text>
-          <Controller
-            control={control}
-            rules={{required: true}}
-            render={({
-              field:{onChange, onBlur, value, name}
-            }) => (
-              <View className="flex justify-center items-start w-full px-10">
-                <Text className="text-lg font-medium">Email:</Text>
-                <TextInput className="w-full rounded"
-                  mode="outlined"
-                  placeholder="Enter your email"
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  autoCompleteType="email"
-                  keyboardType='email-address'
-                  left={<TextInput.Icon icon="account"/>}
-                  activeOutlineColor="#1565C0"
-                />
-              </View>
-            )}
-            name="email"
-          />
-
-          <Controller
-            control={control}
-            rules={{required: true}}
-            render={({
-              field:{onChange, onBlur, value, name}
-            }) => (
-              <View className="flex justify-center items-start w-full px-10 mt-4">
-                <Text className="text-lg font-medium">Password:</Text>
-                <TextInput className="w-full rounded"
-                  mode="outlined"
-                  placeholder="Enter your password"
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  secureTextEntry={true}
-                  autoCompleteType="password"
-                  left={<TextInput.Icon icon="lock"/>}
-                  activeOutlineColor="#1565C0"
-                />
-              </View>
-            )}
-            name="password"
-          />
-          <Button className="border-blue-600 bg-blue-600 p-[3px] mt-7 w-[350px] rounded hover:bg-white " onPress={handleSubmit(onSubmit)}>
-            <Text className="text-white font-bold">LOGIN</Text>
+          <Text className="text-3xl mb-6 font-extrabold text-[#0b3866]" > SIGN IN</Text>
+          {
+              formComponents.map((textInput, i) => {
+                return (
+                  <Controller
+                    key={i}
+                    control={control}
+                    rules={{required: true}}
+                    render={({
+                      field:{onChange, onBlur, value, name}
+                    }) => (
+                      <View className="flex justify-center items-start w-full px-10 mt-5">
+                        <Text className="text-lg font-medium">{textInput.title}</Text>
+                        <TextInput className="w-full rounded"
+                          mode="outlined"
+                          placeholder={textInput.placeholder}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          value={value}
+                          autoCapitalize={textInput.autoCapitalize}
+                          autoCorrect={false}
+                          secureTextEntry={textInput.secureTextEntry}
+                          left={<TextInput.Icon icon={textInput.icon} />}
+                          activeOutlineColor="#1565C0"
+                        />
+                      </View>
+                    )}
+                    name={textInput.defaultFormValue}
+                  />
+                )
+              })
+            }
+          <Button
+            className="border-blue-600 bg-[#0b3866] p-[3px] mt-7 w-[350px] rounded hover:bg-white "
+            onPress={handleSubmit(onSubmit)}>
+            <Text className="text-white text-lg font-bold">LOGIN</Text>
           </Button>
           <View className="mt-6">
-            <Text onPress={() => navigation.navigate("Sign Up")}>
-              Not yet registered? <Text className="text-blue-600 underline">Sign Up</Text>
+            <Text
+              onPress={() => navigation.navigate("Sign Up")}
+            >
+              Not yet registered?
+              <Text className="text-[#357BBD] underline"> Sign Up</Text>
             </Text>
           </View>
-          {/* <SignupBtn send={handleSubmit(onSubmit)}/> */}
         </View>
       </View>
     </KeyboardAvoidingView>
   )
 }
 
-export default SignIn
+export default SignIn;

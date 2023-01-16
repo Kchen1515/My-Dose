@@ -1,31 +1,7 @@
 // const { hashPassword, comparePassword } = require("../helpers/auth");
 require("dotenv").config({path: '../.env'});
 const jwt = require ("jsonwebtoken");
-// const {nanoid} = require("nanoid");
 const User = require("../db/models/user.js")
-
-// exports.signup = async (req, res) => {
-//   const {firstName, lastName, email, password,sugarReading} = req.body
-
-//   const user = await User.findOne({email})
-
-//   if(user) {
-//     return res.json({
-//       error: "Email is taken"
-//     })
-//   }
-//   return User.create({
-//     firstName: firstName,
-//     lastName: lastName,
-//     email: email,
-//     password:password
-//   }).then((newUserData) => {
-//     res.status(201).send("User successfully created")
-//   }).catch((err) => {
-//     res.status(501).send(err)
-//   })
-
-// }
 
 exports.signUp = async  (req,res) => {
   //Deconstruct the request //
@@ -89,17 +65,19 @@ exports.signIn = async (req, res) => {
   })
 }
 
-exports.getUser = (req, res) => {
-  console.log('These ar' + JSON.stringify(req.params))
+exports.getUser = async (req, res) => {
+
   // console.log('Value of id' + id )
-  return User.findOne({_id: req.query.id})
-    .then((data) => {
-      console.log(data)
-      return res.json(data)
-    }).catch((err) => {
-      console.log(err)
+  let user = await User.findOne({_id: req.query.id})
+
+  if(user){
+    console.log(user)
+    return res.json(user)
+  } else {
+    return res.json({
+      error: "User not found"
     })
-  res.send('POST request to the homepage')
+  }
 }
 
 exports.addDetails = async (req, res) => {
@@ -123,36 +101,23 @@ exports.addDetails = async (req, res) => {
   })
 }
 
-// exports.signin = async (req, res) => {
-//   // console.log(req.body);
-//   try {
-//     const { email, password } = req.body;
-//     // check if our db has user with that email
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.json({
-//         error: "No user found",
-//       });
-//     }
-//     // check password
-//     const match = await comparePassword(password, user.password);
-//       if (!match) {
-//         return res.json({
-//           error: "Wrong password",
-//       });
-//     }
-//     // create signed token
-//     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-//       expiresIn: "7d",
-//     });
-//     user.password = undefined;
-//     user.secret = undefined;
-//     res.json({
-//       token,
-//       user,
-//     });
-//   } catch (err) {
-//       console.log(err);
-//       return res.status(400).send("Error. Try again.");
-//   }
-// };
+exports.postLog = async (req, res) => {
+  const {date, reading} = req.body;
+  const user = await User.findOne({ _id: req.query.id})
+  if (!user) {
+    return res.json({
+      error: "Could not save calculation"
+    })
+  }
+  console.log(user)
+  user.entries.push({
+    date: date,
+    reading: reading,
+  })
+  let updatedUser = await user.save();
+  console.log(updatedUser)
+  return res.json({
+    token: "",
+    user: updatedUser
+  })
+}

@@ -1,9 +1,11 @@
 import { View, Text, SafeAreaView, TextInput, ScrollView, Image } from 'react-native'
-import React, {useLayoutEffect} from 'react'
+import React, {useLayoutEffect, useEffect} from 'react'
 import {NavigationContainer,useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {UserIcon, MagnifyingGlassIcon} from 'react-native-heroicons/outline'
-import Categories from '../components/Categories.jsx'
 import {Provider, Button} from 'react-native-paper';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 
 const HomeScreens = ({navigation}) => {
@@ -16,8 +18,12 @@ const HomeScreens = ({navigation}) => {
 
   return (
     <Provider>
-      <View className="w-full h-full flex justify-center items-center bg-white">
-        <View className="w-[210px] h-[210px] flex justify-center items-center rounded-full bg-blue-600">
+      <View className="w-full h-full flex justify-center items-center bg-white"
+      >
+        <LinearGradient
+          className="w-[210px] h-[210px] flex justify-center items-center rounded-full "
+          colors={['#357BBD', '#0b3866']}
+        >
 
           <Image source={require('../assets/logo1.png')} className="p-4"
             style={{
@@ -25,19 +31,19 @@ const HomeScreens = ({navigation}) => {
               width:300,
               height:300,
             }} />
-        </View>
+        </LinearGradient>
         <Button
           mode="outlined"
           buttonColor="white"
-          className="border-blue-500 w-[300px] rounded-md mt-10"
+          className="border-[#0b3866] border-2 w-[300px] rounded-md mt-10  pt-1"
           onPress={() => navigation.navigate("Sign Up")}>
-          <Text className="text-blue-600 font-bold ">SIGN UP</Text>
+          <Text className="text-[#0b3866] text-lg font-bold ">SIGN UP</Text>
         </Button>
         <Button
           mode="contained"
-          className="mt-4 bg-blue-600 w-[300px] rounded-md"
+          className="mt-4 bg-[#0b3866] pt-1 w-[300px] rounded-md"
           onPress={() => navigation.navigate("Sign In")}>
-         <Text className="text-white font-bold">LOGIN</Text>
+         <Text className="text-white text-lg font-bold">LOGIN</Text>
         </Button>
       </View>
     </Provider>

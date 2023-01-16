@@ -36,13 +36,10 @@ const InitialDetailsScreen = ({navigation}) => {
   const getFromLocal = async () => {
     let data = await AsyncStorage.getItem("auth-key")
     let user = JSON.parse(data).user
-    console.log("Where is it coming from" + user)
     setUserId(user._id)
   }
 
   const onSubmit = async (data) => {
-    console.log(data)
-    console.log(userId)
     let user = await axios.post(`http://localhost:3000/details?id=${userId}`, data)
     setState(user.data)
     await AsyncStorage.setItem('auth-key', JSON.stringify(user.data))
@@ -52,12 +49,11 @@ const InitialDetailsScreen = ({navigation}) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-
       <KeyboardAvoidingView  behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <View className="flex items-center justify-center h-full bg-white">
           <IconButton icon="arrow-left" className="absolute left-0 top-[50px]" onPress={() => navigation.navigate("Sign Up")}/>
           <View>
-            <Text className="text-3xl mb-10 font-extrabold text-blue-600">Lets Gather Some Data</Text>
+            <Text className="text-3xl mb-10 font-extrabold text-[#0b3866]">Lets Gather Some Data</Text>
           </View>
           <Controller
               control={control}
@@ -127,7 +123,7 @@ const InitialDetailsScreen = ({navigation}) => {
               )}
               name="target"
             />
-            <Button className="bg-blue-600 mt-8 border p-[3px] w-[350px] rounded" onPress={handleSubmit(onSubmit)}>
+            <Button className="bg-[#0b3866] mt-8 border p-[3px] w-[350px] rounded" onPress={handleSubmit(onSubmit)}>
               <Text className="text-white font-bold">SAVE DATA</Text>
             </Button>
         </View>

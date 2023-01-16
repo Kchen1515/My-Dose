@@ -33,6 +33,7 @@ app.get('/user', routes)
 app.post('/details', routes)
 app.post('/signup', routes)
 app.post('/signin', routes)
+app.post('/log', routes)
 
 
 

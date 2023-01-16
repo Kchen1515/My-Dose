@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
   initial: {
     type: Array,
     required: true
+  },
+  entries: {
+    type: Array,
+    required: true
   }
 })
 

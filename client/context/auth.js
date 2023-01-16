@@ -10,12 +10,16 @@ const StateContext = ({children}) => {
   })
 
   useEffect(() => {
-    console.log(state)
     const loadFromAsyncStorage = async () => {
       let data = await AsyncStorage.getItem('auth-key');
-      const parsed = JSON.parse(data);
-      console.log("this is parsed" + parsed)
-      setState({...state, user: parsed.user, token: parsed.token})
+      if(data === null){
+        console.log("Data not loaded yet")
+      } else {
+        console.log(data)
+        const parsed = JSON.parse(data);
+        console.log(parsed)
+        setState({...state, user: parsed.user, token: parsed.token})
+      }
     }
     loadFromAsyncStorage();
   }, [])

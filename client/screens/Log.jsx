@@ -5,7 +5,7 @@ import {NavigationContainer,useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios'
 import { format, compareAsc, parseISO } from 'date-fns'
-import {IconButton} from 'react-native-paper'
+import {IconButton, Menu, Divider, Provider } from 'react-native-paper'
 
 
 
@@ -16,10 +16,12 @@ const Log = ({navigation}) => {
       headerShown: false
     })
   }, [])
+
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [readingArray, setReadingArray] = useState([])
   const {state, setState} = useContext(Context)
+
 
   useEffect(() => {
     getFromLocal();
@@ -29,12 +31,12 @@ const Log = ({navigation}) => {
     let data = await AsyncStorage.getItem("auth-key")
     let user = JSON.parse(data).user
     let userId = user._id
-    const result = await axios.get(`http://localhost:3000/user?id=${userId}`)
+    const result = await axios.get(`https://e4ef-69-124-242-245.ngrok.io/user?id=${userId}`)
+    if(!result){
+      alert('Not reading logged currently')
+    }
     setState(result.data)
     setReadingArray(result.data.entries)
-    const parsedDate = parseISO(result.data.entries[1].date)
-    setDate(format(parsedDate, "eeee MMMM do"))
-    setTime(format(parsedDate, "h:mm a"))
   }
 
   return (

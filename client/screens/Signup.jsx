@@ -81,7 +81,7 @@ const Signup = ({navigation, props}) => {
   }
   // Function
   const onSubmit = async (data) => {
-    const user = await axios.post('http://localhost:3000/signup', data);
+    const user = await axios.post('https://e4ef-69-124-242-245.ngrok.io/signup', data);
     if(user.data.error){
       showToast(user.data.error)
      }else{
@@ -94,7 +94,7 @@ const Signup = ({navigation, props}) => {
 
   return (
     <KeyboardAvoidingView  behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <View className="flex items-center justify-center border h-full bg-white">
+      <View className="flex items-center justify-center h-full bg-white">
         <IconButton icon="arrow-left" className="absolute left-0 top-[50px]" onPress={() => navigation.navigate("Home")}/>
         <View className="w-full flex items-center justify-center">
           <Text className="text-3xl mb-6 font-extrabold text-[#0b3866]" > SIGN UP</Text>

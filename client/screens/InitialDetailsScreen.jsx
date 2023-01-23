@@ -40,7 +40,7 @@ const InitialDetailsScreen = ({navigation}) => {
   }
 
   const onSubmit = async (data) => {
-    let user = await axios.post(`http://localhost:3000/details?id=${userId}`, data)
+    let user = await axios.post(`https://e4ef-69-124-242-245.ngrok.io/details?id=${userId}`, data)
     setState(user.data)
     await AsyncStorage.setItem('auth-key', JSON.stringify(user.data))
     navigation.navigate("Insulin Calculator")

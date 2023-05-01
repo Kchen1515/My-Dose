@@ -16,9 +16,7 @@ My Dose is an light weight mobile insulin calculation app. Users can securely si
 
 ### Signup
 
-<img src="./demos/signup.gif"/>
-
-![signup](https://user-images.githubusercontent.com/114193129/235526166-65328d0a-844b-4006-97ac-5af00bd6acd2.gif)
+<iframe src="https://giphy.com/embed/wYnDhDvwcLiK3cIQO1" width="222" height="480" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/wYnDhDvwcLiK3cIQO1">via GIPHY</a></p>
 
 ### Base Line Levels
 

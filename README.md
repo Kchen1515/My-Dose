@@ -14,12 +14,20 @@ My Dose is an light weight mobile insulin calculation app. Users can securely si
 
 ### Login
 
+Users can login with the email and password they used when signing up for the account. If the password or email does not match an existing account the application will reject the login attempt and ask the user to provide valid login information.
+<img src="./demos/login.gif" height=500 />
+
 ### Signup
 
+First time users will be asked to signup for an account using their email. They will also provide a first name, last name and password. If the email entered is associated with an existing account, the application will ask the user to provide another email.
 <img src="./demos/signup.gif" height=500 />
 
 ### Base Line Levels
 
-### Calculation
+First time users of the application will be asked to enter their Insulin Sensitivity Factor, Carb Ratio and Target Blood Glucose. The information is then saved and used to make future insulin calculations.
+<img src="./demos/baseline.gif" height=500 />
 
-### Insulin History
+### Calculation / Insulin History
+
+Upon successful creation of an account, the user will be taken to the calculation screen where their baseline levels will be presented. Here the user can enter their current blood sugar and the grams of carbohydrates to be eaten and calculate their bolus insulin dose for the meal. The calculation will then be saved to a log that keeps track of every calculation and insulin dose the patient had made/taken.
+<img src="./demos/calculate.gif" height=500 />
